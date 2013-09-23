@@ -94,6 +94,8 @@ int main() {
         pthread_join(con_thrs[i], NULL);
     }
 
+    sem_destroy(&c_mutex);
+    sem_destroy(&p_mutex);
     sem_destroy(&sem);
     printf("Main thread exiting...\n");
 
