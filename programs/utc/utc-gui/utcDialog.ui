@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>utcDialog</class>
+ <widget class="QDialog" name="utcDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>507</width>
+    <height>279</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Timestamp conversion</string>
+  </property>
+  <widget class="QTabWidget" name="tabWidget">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>10</y>
+     <width>451</width>
+     <height>251</height>
+    </rect>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="tab">
+    <attribute name="title">
+     <string>Timestamp to Date</string>
+    </attribute>
+    <widget class="QWidget" name="">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>421</width>
+       <height>171</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Timestamp:</string>
+            </property>
+            <property name="buddy">
+             <cstring>tsLineEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="tsLineEdit"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Timezone:</string>
+            </property>
+            <property name="buddy">
+             <cstring>tzSpinBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="tzSpinBox">
+            <property name="minimum">
+             <number>-12</number>
+            </property>
+            <property name="maximum">
+             <number>12</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="outTextEdit">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>15</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QPushButton" name="convertButton">
+          <property name="text">
+           <string>Convert</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="exitButton">
+          <property name="text">
+           <string>Exit</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_2">
+    <attribute name="title">
+     <string>Date to Timestamp</string>
+    </attribute>
+    <widget class="QLabel" name="label_8">
+     <property name="geometry">
+      <rect>
+       <x>432</x>
+       <y>-227</y>
+       <width>71</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Timezone:</string>
+     </property>
+     <property name="buddy">
+      <cstring>tzSpinBox</cstring>
+     </property>
+    </widget>
+    <widget class="QWidget" name="">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>411</width>
+       <height>171</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>Date/Time:</string>
+          </property>
+          <property name="buddy">
+           <cstring>tsLineEdit</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDateTimeEdit" name="dateTimeEdit">
+          <property name="minimumSize">
+           <size>
+            <width>160</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>10</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="dateTime">
+           <datetime>
+            <hour>8</hour>
+            <minute>0</minute>
+            <second>0</second>
+            <year>2014</year>
+            <month>1</month>
+            <day>1</day>
+           </datetime>
+          </property>
+          <property name="date">
+           <date>
+            <year>2014</year>
+            <month>1</month>
+            <day>1</day>
+           </date>
+          </property>
+          <property name="time">
+           <time>
+            <hour>8</hour>
+            <minute>0</minute>
+            <second>0</second>
+           </time>
+          </property>
+          <property name="maximumDateTime">
+           <datetime>
+            <hour>22</hour>
+            <minute>59</minute>
+            <second>59</second>
+            <year>2099</year>
+            <month>1</month>
+            <day>1</day>
+           </datetime>
+          </property>
+          <property name="minimumDateTime">
+           <datetime>
+            <hour>8</hour>
+            <minute>0</minute>
+            <second>0</second>
+            <year>1970</year>
+            <month>1</month>
+            <day>1</day>
+           </datetime>
+          </property>
+          <property name="maximumDate">
+           <date>
+            <year>2099</year>
+            <month>1</month>
+            <day>1</day>
+           </date>
+          </property>
+          <property name="minimumDate">
+           <date>
+            <year>1970</year>
+            <month>1</month>
+            <day>1</day>
+           </date>
+          </property>
+          <property name="maximumTime">
+           <time>
+            <hour>22</hour>
+            <minute>59</minute>
+            <second>59</second>
+           </time>
+          </property>
+          <property name="minimumTime">
+           <time>
+            <hour>8</hour>
+            <minute>0</minute>
+            <second>0</second>
+           </time>
+          </property>
+          <property name="currentSection">
+           <enum>QDateTimeEdit::MonthSection</enum>
+          </property>
+          <property name="displayFormat">
+           <string>MM/dd/yyyy hh:mm</string>
+          </property>
+          <property name="calendarPopup">
+           <bool>true</bool>
+          </property>
+          <property name="currentSectionIndex">
+           <number>0</number>
+          </property>
+          <property name="timeSpec">
+           <enum>Qt::UTC</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Timezone:</string>
+          </property>
+          <property name="buddy">
+           <cstring>tzSpinBox</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="tzSpinBox2">
+          <property name="minimum">
+           <number>-12</number>
+          </property>
+          <property name="maximum">
+           <number>12</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QTextEdit" name="outTextEdit2">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>15</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QPushButton" name="convertButton2">
+            <property name="text">
+             <string>Convert</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="exitButton2">
+            <property name="text">
+             <string>Exit</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>82</width>
+              <height>48</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+    <zorder>layoutWidget_2</zorder>
+    <zorder>layoutWidget</zorder>
+    <zorder>layoutWidget_2</zorder>
+    <zorder>label_8</zorder>
+    <zorder>outTextEdit2</zorder>
+    <zorder>convertButton2</zorder>
+    <zorder>exitButton2</zorder>
+    <zorder>verticalSpacer_3</zorder>
+    <zorder>label_9</zorder>
+    <zorder>dateTimeEdit</zorder>
+    <zorder>label_7</zorder>
+    <zorder>tzSpinBox2</zorder>
+   </widget>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>tsLineEdit</tabstop>
+  <tabstop>tzSpinBox</tabstop>
+  <tabstop>convertButton</tabstop>
+  <tabstop>exitButton</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>outTextEdit</tabstop>
+  <tabstop>dateTimeEdit</tabstop>
+  <tabstop>tzSpinBox2</tabstop>
+  <tabstop>outTextEdit2</tabstop>
+  <tabstop>convertButton2</tabstop>
+  <tabstop>exitButton2</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>exitButton</sender>
+   <signal>clicked()</signal>
+   <receiver>utcDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>428</x>
+     <y>110</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>487</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>exitButton2</sender>
+   <signal>clicked()</signal>
+   <receiver>utcDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>422</x>
+     <y>145</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>494</x>
+     <y>204</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
