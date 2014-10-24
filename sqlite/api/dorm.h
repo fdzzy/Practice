@@ -17,4 +17,5 @@ enum {
 #define LOG_BUF_LEN 1024
 #define BUF_LEN 1024
 
+void balance();
 #endif

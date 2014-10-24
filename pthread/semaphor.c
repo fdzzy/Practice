@@ -9,9 +9,11 @@ to implement the consumer/producer model
 #include <semaphore.h>
 
 // Consumer count 
-#define CON_CT 5 
+#define CON_CT 8 
 // Producer count 
-#define PRO_CT 3 
+#define PRO_CT 8 
+// BUFFER Size
+#define BUF_SIZE 5 
 
 sem_t p_mutex;
 int p_count = 0;
@@ -19,14 +21,15 @@ sem_t c_mutex;
 int c_count = 0;
 
 // semaphor to coordinate producer/consumer
-sem_t sem;
+sem_t sem_con;
+sem_t sem_pro;
 
 void* consumer(void* id) {
     int num = (int)id;
     int i = 0;
     int count;
 
-    printf("Consumer %d starting...\n", num);
+    printf("\tConsumer %d starting...\n", num);
 
     while(1) {
         sem_wait(&c_mutex);
@@ -34,19 +37,23 @@ void* consumer(void* id) {
             sem_post(&c_mutex);
             break;
         }
-        sem_wait(&sem);
+        /* Waiting for products */
+        sem_wait(&sem_con);
         count = c_count;
-        printf("Consumer %d start consuming product #%d, my #%d\n", num, count, i);
+        printf("\tConsumer %d start consuming product #%d, my #%d\n", num, count, i);
         c_count++;
         sem_post(&c_mutex);
+        /* Simulating the time to consuming */
         if(num%2) {
             sleep(5);
         } else {
             sleep(3);
         }
-        printf("Consumer %d finished consuming product #%d, my #%d\n", num, count, i++);
+        printf("\tConsumer %d finished consuming product #%d, my #%d\n", num, count, i++);
+        /* Signal producer */
+        sem_post(&sem_pro);
     }
-    printf("Consumer %d consumed %d product(s), exiting...\n", num, i);
+    printf("\tConsumer %d consumed %d product(s), exiting...\n", num, i);
 
     pthread_exit(NULL);
 }
@@ -58,11 +65,14 @@ void* producer(void* id) {
     printf("Producer %d starting...\n", num);
     for(i=0; i<CON_CT ; i++) {
         sleep(1);
+        /* Waiting for buffer size */
+        sem_wait(&sem_pro);
         sem_wait(&p_mutex);
         printf("Producer %d produced product #%d, my #%d\n", num, p_count, i);
         p_count++;
         sem_post(&p_mutex);
-        sem_post(&sem);
+        /* Signal consumer */
+        sem_post(&sem_con);
     }
     printf("Producer %d produced %d product(s), exiting...\n", num, i);
 
@@ -76,9 +86,12 @@ int main() {
 
     printf("Main thread starting...\n");
 
-    sem_init(&sem, 0, 0);
     sem_init(&p_mutex, 0, 1);
     sem_init(&c_mutex, 0, 1);
+    // initialize consumer semaphor to be zero indicating no products
+    sem_init(&sem_con, 0, 0);
+    // initialize producer semaphor to be BUF_SIZE indicating BUF_SIZE poducts can be produced
+    sem_init(&sem_pro, 0, BUF_SIZE);
 
     for(i=0 ; i<CON_CT ; i++) {
         pthread_create(&con_thrs[i], NULL, consumer, (void*)i);
@@ -94,9 +107,10 @@ int main() {
         pthread_join(con_thrs[i], NULL);
     }
 
+    sem_destroy(&sem_pro);
+    sem_destroy(&sem_con);
     sem_destroy(&c_mutex);
     sem_destroy(&p_mutex);
-    sem_destroy(&sem);
     printf("Main thread exiting...\n");
 
     return 0;

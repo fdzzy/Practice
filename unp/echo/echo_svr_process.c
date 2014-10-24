@@ -6,6 +6,7 @@ void process_connection(int connfd)
     char    buf[MAXLINE];
     char    buf2[MAXLINE];
     size_t  size;
+    int     i;
 
     printf("Child process %d processing connection\n", getpid());
     size = read(connfd, buf, MAXLINE); 
@@ -14,6 +15,7 @@ void process_connection(int connfd)
 
     snprintf(buf2, MAXLINE, "Server responding: %s", buf);
      
+    for(i=0 ; i<50 ; i++)
     if(write(connfd, buf2, strlen(buf2)) < 0)
         err_sys("write error");
 
@@ -24,6 +26,7 @@ int main(int argc, char* argv)
 {
     int     listenfd, connfd, i, pid;
     struct  sockaddr_in servaddr;
+    clock_t start, time;
 
     if( (listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0 )
         err_quit("socket error");
@@ -45,6 +48,7 @@ int main(int argc, char* argv)
         if( (connfd = accept(listenfd, (SA *) NULL, NULL)) < 0 )
             err_sys("accept error");
 
+        start = clock();
         pid = fork();
         if(pid < 0) {
             err_sys("fork error");
@@ -53,6 +57,10 @@ int main(int argc, char* argv)
             process_connection(connfd);
             exit(0);
         }
+    
+        waitpid(pid);
+        time = clock() - start;
+        printf("Time taken = %f msec\n", ((double)time/CLOCKS_PER_SEC)*1000.00);
         
         close(connfd);
     }

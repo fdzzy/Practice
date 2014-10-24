@@ -11,7 +11,15 @@ sqlite3 *db;
 
 char cmd_prompt = '>';
 
-int LOG_LEVEL = LOG_DBG;
+//int LOG_LEVEL = LOG_DBG;
+int LOG_LEVEL = LOG_ERR;
+
+const char* SUBMITTER[] = {
+    "unknown",
+    "zzy",
+    "wwb",
+    "other"
+};
 
 const char* LOG_PROMPT[] = {
     "DORM LOG CRITICAL: ",
@@ -94,13 +102,13 @@ void db_init()
         exit(1);
     }
 
-    sql = "create table dorm (id INTEGER primary key, amount REAL NOT NULL, date INTEGER DEFAULT (strftime('\%s','now')), descr TEXT DEFAULT NULL, type INTEGER DEFAULT 0);";
+    sql = "create table dorm (id INTEGER primary key, amount REAL NOT NULL, date INTEGER DEFAULT (strftime('\%s','now')), descr TEXT DEFAULT NULL, type INTEGER DEFAULT 0, submitter INTEGER DEFAULT 0);";
     sqlite3_exec_err(db, sql);
 
     sql = "create view balance as select SUM(amount) as balance from dorm;";
     sqlite3_exec_err(db, sql);
      
-    sql = "create view query as select id, amount, datetime(date, 'unixepoch', 'localtime') as date, descr, type from dorm;";
+    sql = "create view query as select id, amount, datetime(date, 'unixepoch', 'localtime') as date, descr, type, submitter from dorm;";
     sqlite3_exec_err(db, sql);
 }
 
@@ -154,14 +162,14 @@ char* get_token(char** ppstr)
         while( (*pstr != '"') && (i<(BUF_LEN-2)) ) {
             token[i++] = *pstr++;
         }
-        token[i++] = '"';
+        token[i++] = *pstr++;
         token[i] = '\0'; 
     } else if ( *pstr == '\'' ) {
         token[i++] = *pstr++;
         while( (*pstr != '\'') && (i<(BUF_LEN-2)) ) {
             token[i++] = *pstr++;
         }
-        token[i++] = '\'';
+        token[i++] = *pstr++;
         token[i] = '\0'; 
     } else {
         /* strncpy */ 
@@ -178,17 +186,21 @@ char* get_token(char** ppstr)
 void print_help()
 {
     printf("\ncommands:\n");
-    printf("insert (amount) ('description')\t- insert record\n");
-    printf("update (id) (amount) ('descr')\t- update record\n");
+    printf("insert (amount) ('description') [submitter] [time]\t- insert record\n");
+    printf("       submitter value: 0 is unknown [default], 1 is zzy, 2 is wwb, 3 is other\n");
+    printf("       time format: 'YYYY-MM-DD HH:MM:SS'\n");
+    printf("update (id) (amount) ('descr') [submitter]\t- update record\n");
     printf("delete (id)\t\t\t- delete the record with its id specified\n");
-    printf("list [all]\t\t\t- list all records\n");
-    printf("list last (number of days)\t- list records of last number of days\n");
+    printf("list/ls [all]\t\t\t- list all records\n");
+    printf("list/ls last (number of days)\t- list records of last number of days\n");
     printf("balance\t\t\t\t- show balance\n");
+    printf("exit\t\t\t\t- exit\n");
+    printf("quit\t\t\t\t- the same as 'exit'\n");
     printf("\n");
 }
 
 /* id is ignored if insert is true */
-static void __insert_update(double amount, char *descr, bool insert, int id)
+static void __insert_update(double amount, char *descr, bool insert, int submitter, char *time, int id)
 {
     char sql[BUF_LEN];
     char *errMsg;
@@ -196,9 +208,17 @@ static void __insert_update(double amount, char *descr, bool insert, int id)
     int type = (amount < 0) ? 0 : 1;
 
     if(insert) {
-        snprintf(sql, BUF_LEN, "insert into dorm (amount, descr, type) values(%lf, %s, %d)", amount, descr, type); 
+        if((time == NULL) || !time[0]) {
+            snprintf(sql, BUF_LEN, "insert into dorm (amount, descr, type, submitter) values(%lf, %s, %d, %d)", amount, descr, type, submitter); 
+        } else {
+            snprintf(sql, BUF_LEN, "insert into dorm (amount, descr, type, submitter, date) values(%lf, %s, %d, %d, (strftime('%%s', %s)))", amount, descr, type, submitter, time); 
+        }
     } else {
-        snprintf(sql, BUF_LEN, "update dorm set amount=%lf, descr=%s, type=%d where id=%d", amount, descr, type, id); 
+        if(submitter < 0) {
+            snprintf(sql, BUF_LEN, "update dorm set amount=%lf, descr=%s, type=%d where id=%d", amount, descr, type, id); 
+        } else {
+            snprintf(sql, BUF_LEN, "update dorm set amount=%lf, descr=%s, type=%d, submitter=%d where id=%d", amount, descr, type, submitter, id); 
+        }
     }
 
     dorm_log(LOG_DBG, "exec SQL: %s\n", sql);
@@ -224,6 +244,8 @@ void insert(char* line)
 {
     double amount;
     char descr[BUF_LEN];
+    char time[BUF_LEN];
+    int submitter;
     char *token; 
 
     get_token(&line);   // This is 'insert'
@@ -241,14 +263,29 @@ void insert(char* line)
         return;
     }
     strncpy(descr, token, BUF_LEN);
+    token = get_token(&line);   // This is 'submitter'
+    if(!token || !token[0]) {
+        submitter = 0;
+        goto out;
+    } else {
+        sscanf(token, "%d", &submitter);
+    }
+    token = get_token(&line);   // This is 'time'
+    if(!token || !token[0]) {
+        time[0] = '\0';
+    } else {
+        strncpy(time, token, BUF_LEN);
+    }
     
-    __insert_update(amount, descr, true, 0);
+out:
+    /* id is ignored if insert is true */
+    __insert_update(amount, descr, true, submitter, time, 0);
 }
 
 void update(char* line)
 {
     double amount;
-    int id, rc;
+    int id, rc, submitter;
     char descr[BUF_LEN];
     char *token; 
 
@@ -282,8 +319,14 @@ void update(char* line)
         return;
     }
     strncpy(descr, token, BUF_LEN);
+    token = get_token(&line);   // This is 'submitter'
+    if(!token || !token[0]) {
+        submitter = -1;
+    } else {
+        sscanf(token, "%d", &submitter);
+    }
     
-    __insert_update(amount, descr, false, id);
+    __insert_update(amount, descr, false, submitter, NULL, id);
 }
 
 void delete(char* line)
@@ -322,7 +365,7 @@ void delete(char* line)
 
 static void __list(int days)
 {
-    int rc, ncols, i, id, type;
+    int rc, ncols, i, id, type, submitter;
     double amount;
     sqlite3_stmt *stmt;
     char *sql;
@@ -332,7 +375,7 @@ static void __list(int days)
     if(days <= 0) {
         sql = "select * from query;";
     } else {
-        snprintf(buf, BUF_LEN, "select id, amount, datetime(date, 'unixepoch', 'localtime') as date, descr, type from dorm where date>=strftime('%%s', 'now', '-%d days');", days);
+        snprintf(buf, BUF_LEN, "select id, amount, datetime(date, 'unixepoch', 'localtime') as date, descr, type, submitter from dorm where date>=strftime('%%s', 'now', '-%d days');", days);
         sql = buf;
     }
 
@@ -360,11 +403,16 @@ static void __list(int days)
         date = sqlite3_column_text(stmt, 2);
         descr = sqlite3_column_text(stmt, 3);
         type = sqlite3_column_int(stmt, 4); 
-        printf("%d|%.2lf|%s|%s|%d\n", id, amount, date, descr, type);
+        submitter = sqlite3_column_int(stmt, 5);
+        if((submitter > 3) || (submitter < 0)) submitter = 0;
+        printf("%d|%.2lf|%s|%s|%d|%s\n", id, amount, date, descr, type, SUBMITTER[submitter]);
         rc = sqlite3_step(stmt);
     }
 
     sqlite3_finalize(stmt);
+
+    if(days <= 0)
+        balance();
 }
 
 void list(char* line)
@@ -420,18 +468,22 @@ void cmd(char* line)
 {
     dorm_log(LOG_DBG, "CMD: %s", line);
 
-    if(strncmp(line, "help", 4) == 0) {
+    if(line[0] == 'h') {
         print_help();
-    } else if(strncmp(line, "list", 4) == 0) {
+    } else if( (strncmp(line, "lis", 3) == 0) ||
+               (strncmp(line, "ls", 2) ==0) ){
         list(line);
-    } else if(strncmp(line, "insert", 6) == 0) {
+    } else if(strncmp(line, "ins", 3) == 0) {
         insert(line);
-    } else if(strncmp(line, "update", 6) == 0) {
+    } else if(strncmp(line, "upd", 3) == 0) {
         update(line);
-    } else if(strncmp(line, "delete", 6) == 0) {
+    } else if(strncmp(line, "del", 3) == 0) {
         delete(line);
-    } else if(strncmp(line, "balance", 7) == 0) {
+    } else if(strncmp(line, "bal", 3) == 0) {
         balance();
+    } else {
+        printf("Error command: %s", line);
+        printf("Use 'help' to show how to use this command line.\n\n");
     }
 }
 
@@ -441,12 +493,12 @@ int main(int argc, char* argv[])
 
     db_open();    
 
-    printf("\nWelcome to use the dorm comand line tools.\nUse 'help' to show the help information.\n\n");
+    printf("\nWelcome to use the dorm comand line tools.\nUse 'help' to show how to use this command line.\n");
     while(1) {
         printf("%c ", cmd_prompt);
         fgets(line, BUF_LEN, stdin);
         if( (strncmp(line, "exit", 4) == 0) || 
-            (strncmp(line, "quit", 4) ==0) )
+            (line[0] == 'q') )
             break;
         cmd(line); 
     } 
